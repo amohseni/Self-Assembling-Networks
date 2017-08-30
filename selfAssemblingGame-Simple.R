@@ -1,9 +1,8 @@
-###################################################
-# SELF-ASSEMBLING GAME (Signalling Chain) v9.7
-###################################################
-# Created by: Aydin Mohseni 
-# Contact: aydin.mohseni@gmail.com
-# URL: www.aydinmohseni.com
+# --------------------------------------------------
+# SELF-ASSEMBLING NETWORKS
+# by: Aydin Mohseni 
+# www.aydinmohseni.com
+# --------------------------------------------------
 
 # Install relevant packages from the library
 library(reshape2)
@@ -11,8 +10,8 @@ library(ndtv)
 library(tsna)  
 
 # Global variables
-N <- 8 # population size
-roundsOfPlay <- 100 # number of rounds of play with each generations 
+N <- 6 # population size
+roundsOfPlay <- 3 # number of rounds of play with each generations 
 perfectCommunication <- TRUE # whether agents communicate perfectly
 reliablity.Nature.inf <- 0 # minimum reliability of agents when interacting with Nature
 reliablity.Nature.sup <- 1 # maximum reliability of agents when interacting with Nature
@@ -27,9 +26,9 @@ rownames(initialAdjMatrix) <- c("n", 1:N) # label the rows
 colnames(initialAdjMatrix) <- c("n", 1:N) # label the columns
 adjMatrixOverTime[[1]] <- initialAdjMatrix
 
-###################################################  
-## Agent properties
-###################################################  
+# --------------------------------------------------
+# Agent properties
+# --------------------------------------------------
 agent0 <- c(TRUE) # create Nature, who always knows the truth
 for (i in 1:N) { # create N agents
   # Set up agent urn with one ball for Nature (0), and one ball for each agent (1-N)
@@ -48,9 +47,9 @@ for (i in 1:N) { # create N agents
            eval(parse(text=paste("urn", i, sep=""))))) 
 }
 
-###################################################  
-## Play game
-###################################################
+# --------------------------------------------------
+# Play game
+# --------------------------------------------------
 for (round in 1:roundsOfPlay) {  # Set up the for-loop to go for rounds of play 
   
   # Generate a random order for each generation of play
@@ -71,9 +70,9 @@ for (round in 1:roundsOfPlay) {  # Set up the for-loop to go for rounds of play
     interactionPartnerBall <- sample(eval(parse(text=paste("urn", focalAgent, sep=""))), 1, replace=TRUE) 
     interactionPartnerVector <- eval(parse(text=paste("agent", interactionPartnerBall, sep=""))) 
  
-    ###################################################
+    # -------------------------------------------------- 
     # If the chosen interaction partner is Nature, 
-    ###################################################
+    # --------------------------------------------------
     # then the agent succeeds in learning the true state of the world 
     # with probability corresponding to her reliability.
     if (interactionPartnerBall == 0) {
@@ -104,18 +103,18 @@ for (round in 1:roundsOfPlay) {  # Set up the for-loop to go for rounds of play
       }
     }
     
-    ###################################################  
-    ## Alternatively, if the chosen interaction partner is another agent
-    ###################################################
+    # --------------------------------------------------
+    # Alternatively, if the chosen interaction partner is another agent
+    # --------------------------------------------------
     if (interactionPartnerBall %in% 1:N) {
     
       # (Print the agent selected, and their corresponding knowledgeState)
         # print(paste("Agent", focalAgent, " chooses to interact with agent", interactionPartnerBall, ",", sep="")) 
         # print(paste("and agent", interactionPartnerBall, " knowledgeState is ", interactionPartnerVector[1], ",", sep=""))  
       
-      ###################################################
-      ## Where communication between agents is perfect, we proceed as follows
-      ###################################################
+      # --------------------------------------------------
+      # Where communication between agents is perfect, we proceed as follows
+      # --------------------------------------------------
       if (perfectCommunication == TRUE) {  
         
         # Then, if the interactionPartner knows the correct state of the world, 
@@ -142,9 +141,9 @@ for (round in 1:roundsOfPlay) {  # Set up the for-loop to go for rounds of play
         }
       } # End of PerfectCommuniation == TRUE case
       
-      ###################################################
+      # --------------------------------------------------
       ## Alternatively, when communication between agents is *imperfect*, we proceed as follows
-      ###################################################
+      # --------------------------------------------------
       if (perfectCommunication == FALSE) {
         
         # We draw a random difficulty value in [0,1]
@@ -189,8 +188,10 @@ for (round in 1:roundsOfPlay) {  # Set up the for-loop to go for rounds of play
         }
       }
     } # End of PerfectCommuniation == FALSE case
-    
+  
+  # --------------------------------------------------    
   } # End of round of play
+  # --------------------------------------------------
   
   # Create a new adjacency matrix recording the new network structure
   adjMatrix <- data.frame(matrix(data = 0, nrow = N + 1, ncol = N + 1))
@@ -224,10 +225,20 @@ for (round in 1:roundsOfPlay) {  # Set up the for-loop to go for rounds of play
   adjMatrixOverTime[[round + 1]] <- adjMatrix
   # adjMatrixOverTime[[((round - 1) * N + randomAgent)]] <- as.network(adjMatrix)
   
+# --------------------------------------------------  
 } # End of simulation
-  
+# --------------------------------------------------
+
+# --------------------------------------------------
+# Create dynamic network animation
+# --------------------------------------------------
+
+# Convert adjacenty matrices to network matrices
 dfAdjacencyMatrixList <- lapply(adjMatrixOverTime, as.network.matrix, matrix.type = 'adjacency')
+# Convert adjacenty matrices to a network dynamic
 dfDynamic <- networkDynamic(network.list = dfAdjacencyMatrixList)
+# Select the subset of the dynamic to be animated
+# Specifically, remove the last (empty) network from the animation
 animationSlice <- list(
   start = 0,
   end = roundsOfPlay,
@@ -235,12 +246,14 @@ animationSlice <- list(
   aggregate.dur = 0,
   rule = "latest"
 )
+# Compute the animation of the dynamic
 compute.animation(
   dfDynamic,
   slice.par = animationSlice,
   animation.mode = 'MDSJ',
   verbose = FALSE
 )
+# Output the network animation as an HTML widget
 render.d3movie(dfDynamic,
                render.par = list(
                  tween.frames = 1,
@@ -267,14 +280,6 @@ render.d3movie(dfDynamic,
                script.type = 'embedded', 
                output.mode = 'htmlWidget'
                )
-# render.animation(
-#   dfDynamic,
-#   render.par = list(tween.frames = 10),
-#   vertex.col = 'blue',
-#   edge.col = 'gray'
-# )
-
-
 
 ## EOD
 
