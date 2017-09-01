@@ -12,22 +12,27 @@ Sys.setlocale("LC_ALL", "fr_FR.UTF-8")
 # Define UI for application
 shinyUI(fluidPage(
   
-  # CSS for visual
+  # CSS for visual stying
   includeCSS("www/style.css"),
   
   # Main title
   titlePanel("Self-Assembling Networks"),
   
-  # Load MathJax
-  withMathJax(),
-  
-  # Sidebar with a slider input for number of bins
+  # Sidebar layout
   sidebarLayout(
     sidebarPanel(
       width = 3,
       
+      # Styling to remove "small" tick marks from sliders
       tags$style(type = "text/css", ".irs-grid-pol.small {height: 0px;}"),
       
+      # Introduction text
+      p("This model explores how a social network might self-assemble from the ritualization of the decisions of individual agents."),
+      
+      # Instructions text
+      p("To explore the model, select the simulation parameters, then click the 'RUN SIMULATION' button."),
+
+      # Slider for population size
       sliderInput(
         "PopulationSize",
         "Population Size:",
@@ -37,6 +42,7 @@ shinyUI(fluidPage(
         step = 1
       ), 
       
+      # Radio buttons for wether communication is perfect or imperfect
       radioButtons(
         "PerfectCommunication",
         "Perfect Communication:",
@@ -45,6 +51,7 @@ shinyUI(fluidPage(
         selected = "Imperfect"
       ), 
       
+      # Slider for the number of rounds of the simulation
       sliderInput(
         "RoundsOfPlay",
         "Number of Rounds:",
@@ -54,13 +61,14 @@ shinyUI(fluidPage(
         step = 1
       ),
       
+      # Action button to run simulation
       p(actionButton("runSimulation", "Run Simulation"), align = "center")
       
     ),
     
-    # Show a plot of the generated distribution
+    # Animation of network formation via reinforcement learning
     mainPanel(
-      ndtv:::ndtvAnimationWidgetOutput("netPlot")
+      ndtv:::ndtvAnimationWidgetOutput("netPlot", width = "100%", height = "560px")
       )
     
   )

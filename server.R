@@ -8,6 +8,7 @@ library(shiny)
 library(reshape2)
 library(ndtv)
 library(network)
+library(htmlwidgets)
 
 
 ### Define server logic for Application
@@ -32,6 +33,7 @@ shinyServer(function(input, output, session) {
         .5 # minimum reliability of agents when interacting with other agents
       reliablity.agents.sup <-
         1 # maximum reliability of agents when interacting with other agents
+      generation <- 10 # rounds for which the state of the world is the same
       
       # Create a data frame in which to save the simulation results
       # specifically, the edge-lists of the network for each round of play
@@ -89,8 +91,9 @@ shinyServer(function(input, output, session) {
       for (round in 1:roundsOfPlay) {
         # Set up the for-loop to go for rounds of play
         
-        # Every tenth round, Reset the agent's to a state of ignorance at the end of each generation
-        if (round %% 10 == 0) {
+        # Every generation, Nature changes, 
+        # and we reset the agents' to a state of ignorance 
+        if (round %% generation == 0) {
           for (i in 1:N) {
             assign(paste("agent", i, sep = ""), `[<-`(eval(parse(
               text = paste("agent", i, sep = "")
@@ -98,11 +101,9 @@ shinyServer(function(input, output, session) {
           }
         }
         
-        # Generate a random order for each generation of play
+        # Generate a random order for each round of play
         orderOfPlay <- sample(1:N, N, replace = FALSE)
-        # print(paste(">> Generation ", generation, " order of play:", sep=""))
-        # print(orderOfPlay)
-        
+
         # Set up the for-loop for each agent's interation
         for (randomAgent in 1:N) {
           # Select a random agent to attempt to play:
@@ -127,13 +128,12 @@ shinyServer(function(input, output, session) {
           # then the agent succeeds in learning the true state of the world
           # with probability corresponding to her reliability.
           if (interactionPartnerBall == 0) {
-            # print(paste("Agent", focalAgent, " chooses to confer with Nature", sep=""))
             
             # Nature draws a random difficulty value in [0,1]
             NatureDifficulty <- round(runif(1, 0, 1), digits = 3)
-            # print(paste("(Reliability of ", eval(parse(text=paste("reliability1", focalAgent, sep=""))), " vs difficulty of ", NatureDifficulty, ")", sep=""))
             
-            # And by comparison with the agents reliability, we determine if the agent succeeds in learning the true state of the world,
+            # And by comparison with the agents reliability, 
+            # we determine if the agent succeeds in learning the true state of the world,
             if (eval(parse(text = paste(
               "reliability1", focalAgent, sep = ""
             ))) >= NatureDifficulty) {
@@ -153,10 +153,6 @@ shinyServer(function(input, output, session) {
                          text = paste("urn", focalAgent, sep = "")
                        )))
                      ))
-              # print(paste("agent", focalAgent, " succeeds in learning the true state of the world,", sep=""))
-              # print("so, reinforce Nature ball.")
-              # print(paste("Agent", focalAgent, " urn is now:", sep=""))
-              # print(eval(parse(text=paste("urn", focalAgent, sep=""))))
             }
             # Or fails to learn the true state of the world.
             if (eval(parse(text = paste(
@@ -167,9 +163,6 @@ shinyServer(function(input, output, session) {
                      `[<-`(eval(parse(
                        text = paste("agent", focalAgent, sep = "")
                      )), 1, FALSE))
-              # print(paste("agent", focalAgent, " fails to learn the true state of the world.", sep=""))
-              # print(paste("Agent", focalAgent, " urn is now:", sep=""))
-              # print(eval(parse(text=paste("urn", focalAgent, sep=""))))
             }
           }
           
@@ -177,9 +170,6 @@ shinyServer(function(input, output, session) {
           # Alternatively, if the chosen interaction partner is another agent
           # --------------------------------------------------
           if (interactionPartnerBall %in% 1:N) {
-            # (Print the agent selected, and their corresponding knowledgeState)
-            # print(paste("Agent", focalAgent, " chooses to interact with agent", interactionPartnerBall, ",", sep=""))
-            # print(paste("and agent", interactionPartnerBall, " knowledgeState is ", interactionPartnerVector[1], ",", sep=""))
             
             # --------------------------------------------------
             # Where communication between agents is perfect, we proceed as follows
@@ -194,7 +184,6 @@ shinyServer(function(input, output, session) {
                        `[<-`(eval(parse(
                          text = paste("agent", focalAgent, sep = "")
                        )), 1, TRUE))
-                # print(paste("so, reinforce agent", interactionPartnerBall, " ball.", sep =""))
                 # Reinfoce the corresponding interactionPartner's ball in the agent's urn
                 assign(paste("urn", focalAgent, sep = ""),
                        append(
@@ -206,10 +195,8 @@ shinyServer(function(input, output, session) {
                            text = paste("urn", focalAgent, sep = "")
                          )))
                        ))
-                # print(paste("Agent", focalAgent, " urn is now:", sep=""))
-                # print(eval(parse(text=paste("urn", focalAgent, sep=""))))
               }
-              # And, if the interactionPartner doesn'numberOfGenerations know the correct state of the world,
+              # And, if the interactionPartner doesn't know the correct state of the world,
               # then the agent infers a false state of the world
               # and does not reinforce.
               if (interactionPartnerVector[1] == FALSE) {
@@ -218,22 +205,20 @@ shinyServer(function(input, output, session) {
                        `[<-`(eval(parse(
                          text = paste("agent", focalAgent, sep = "")
                        )), 1, FALSE))
-                # print(paste("so, do NOT reinforce agent", interactionPartnerBall, " ball.", sep =""))
-                # print(paste("Agent", focalAgent, " urn is now:", sep=""))
-                # print(eval(parse(text=paste("urn", focalAgent, sep=""))))
               }
             } # End of PerfectCommuniation == TRUE case
             
             # --------------------------------------------------
-            ## Alternatively, when communication between agents is *imperfect*, we proceed as follows
+            ## Alternatively, when communication between agents is *imperfect*, 
+            # we proceed as follows
             # --------------------------------------------------
             if (perfectCommunication == FALSE) {
               # We draw a random difficulty value in [0,1]
               communicationDifficulty <-
                 round(runif(1, 0, 1), digits = 3)
-              # print(paste("(Reliability of ", eval(parse(text=paste("reliability2", focalAgent, sep=""))), " vs difficulty of ", communicationDifficulty, ")", sep=""))
               
-              # And by comparison with the agents reliability, we determine if the agent succeeds in learning from the other agent's knowledge.
+              # And by comparison with the agents reliability, 
+              # we determine if the agent succeeds in learning from the other agent's knowledge.
               # If communcation is successful…
               if (eval(parse(text = paste(
                 "reliability2", focalAgent, sep = ""
@@ -247,7 +232,6 @@ shinyServer(function(input, output, session) {
                          `[<-`(eval(parse(
                            text = paste("agent", focalAgent, sep = "")
                          )), 1, TRUE))
-                  # print(paste("so, reinforce agent", interactionPartnerBall, " ball.", sep =""))
                   # Reinfoce the corresponding interactionPartner's ball in the agent's urn
                   assign(
                     paste("urn", focalAgent, sep = ""),
@@ -261,10 +245,8 @@ shinyServer(function(input, output, session) {
                       )))
                     )
                   )
-                  # print(paste("Agent", focalAgent, " urn is now:", sep=""))
-                  # print(eval(parse(text=paste("urn", focalAgent, sep=""))))
                 }
-                # And, if the interactionPartner doesn'numberOfGenerations know the correct state of the world,
+                # And, if the interactionPartner doesn't know the correct state of the world,
                 # then the agent infers a false state of the world
                 # and does not reinforce.
                 if (interactionPartnerVector[1] == FALSE) {
@@ -273,9 +255,6 @@ shinyServer(function(input, output, session) {
                          `[<-`(eval(parse(
                            text = paste("agent", focalAgent, sep = "")
                          )), 1, FALSE))
-                  # print(paste("so, do NOT reinforce agent", interactionPartnerBall, " ball.", sep =""))
-                  # print(paste("Agent", focalAgent, " urn is now:", sep=""))
-                  # print(eval(parse(text=paste("urn", focalAgent, sep=""))))
                 }
               }
               
@@ -288,9 +267,6 @@ shinyServer(function(input, output, session) {
                        `[<-`(eval(parse(
                          text = paste("agent", focalAgent, sep = "")
                        )), 1, FALSE))
-                # print(paste("agent", focalAgent, " fails to learn from their partner.", sep=""))
-                # print(paste("Agent", focalAgent, " urn is now:", sep=""))
-                # print(eval(parse(text=paste("urn", focalAgent, sep=""))))
               }
             }
           } # End of PerfectCommuniation == FALSE case
@@ -352,7 +328,7 @@ shinyServer(function(input, output, session) {
       # Convert adjacenty matrices to network matrices
       dfAdjacencyMatrixList <-
         lapply(adjMatrixOverTime, as.network.matrix, matrix.type = 'adjacency')
-      # Convert adjacenty matrices to a network dynamic
+      # Convert network matrices to a network dynamic
       dfDynamic <-
         networkDynamic(network.list = dfAdjacencyMatrixList)
       # Select the subset of the dynamic to be animated:
@@ -374,24 +350,28 @@ shinyServer(function(input, output, session) {
       # Output the network animation as an HTML widget
       render.d3movie(
         dfDynamic,
+        # Interface functionality parameters
         render.par = list(
           tween.frames = 1,
           show.time = FALSE,
           show.stats = NULL,
           extraPlotCmds = NULL
         ),
+        # Network visual parameters
         plot.par = list(
           bg = 'white',
           vertex.cex = 1.5,
           vertex.col = c("#4595F0", rep("gray20", N)),
           vertex.border = c("#4595F0", rep("gray20", N)),
           edge.col = "darkgray",
+          label.col = c("#4595F0", rep("gray20", N)), 
           label.cex = 1,
           displaylabels = TRUE
         ),
+        # Animation functionality parameters
         d3.options = list(
           animateOnLoad = TRUE,
-          animationDuration = 400,
+          animationDuration = 600,
           durationControl = FALSE,
           slider = TRUE
         ),
