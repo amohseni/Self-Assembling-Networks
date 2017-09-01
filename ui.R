@@ -41,16 +41,16 @@ shinyUI(fluidPage(
         "PerfectCommunication",
         "Perfect Communication:",
         choiceNames = list("True", "False"),
-        choiceValues = list("Perfect", "Imperfect")
-        # selected = "Perfect"
+        choiceValues = list("Perfect", "Imperfect"),
+        selected = "Imperfect"
       ), 
       
       sliderInput(
         "RoundsOfPlay",
         "Number of Rounds:",
-        min = 1,
-        max = 40,
-        value = 5,
+        min = 10,
+        max = 100,
+        value = 20,
         step = 1
       ),
       

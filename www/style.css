@@ -20,6 +20,11 @@ html {
 body {
   margin: 0;
 }
+#netPlot_ndtvAnimation {
+  border: 1px;
+  border-style: solid;
+  border-color: #F3F3F3;
+}
 article,
 aside,
 details,

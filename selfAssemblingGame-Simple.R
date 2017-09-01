@@ -11,7 +11,7 @@ library(tsna)
 
 # Global variables
 N <- 6 # population size
-roundsOfPlay <- 3 # number of rounds of play with each generations 
+roundsOfPlay <- 40 # number of rounds of play with each generations 
 perfectCommunication <- TRUE # whether agents communicate perfectly
 reliablity.Nature.inf <- 0 # minimum reliability of agents when interacting with Nature
 reliablity.Nature.sup <- 1 # maximum reliability of agents when interacting with Nature
@@ -212,11 +212,11 @@ for (round in 1:roundsOfPlay) {  # Set up the for-loop to go for rounds of play
       # If so, in the adjacency matrix, count the focal agent 
       # as having developed a 'link' to that agent
       if (urnCount[j,2] / urnTotal > (N + 1) ^ -1) {
-        adjMatrix[agent, j] <- 1
+        adjMatrix[agent + 1, j] <- 1
       } else {
         # If not, in the adjacency matrix, count the focal agent
         # as having no 'link' to that agent
-        adjMatrix[agent, j] <- 0
+        adjMatrix[agent + 1, j] <- 0
       }
     }
   }
