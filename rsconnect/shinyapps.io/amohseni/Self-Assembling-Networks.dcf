@@ -3,9 +3,9 @@ title: Self-Assembling-Networks
 account: amohseni
 server: shinyapps.io
 appId: 209800
-bundleId: 963321
+bundleId: 964857
 url: https://amohseni.shinyapps.io/Self-Assembling-Networks/
-when: 1504256320.9611
+when: 1504380808.29602
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: source/htmlShinyWidgetTest.R|source/selfAssemblingGame-9.7.R|source/selfAssemblingGame-Simple.R|source/selfAssemblingNetworks-DirectedGraphs.R|source/selfAssemblingNetworks-SummaryCharts.R|www/.DS_Store
