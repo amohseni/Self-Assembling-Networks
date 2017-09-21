@@ -17,7 +17,8 @@ shinyServer(function(input, output, session) {
     # Take a depdendency with the runSimulation action button,
     # causing the simulation to be run when it is pressed
     input$runSimulation
-
+    
+    # Initialize progress loader
     withProgress(message = 'Making plot:', value = 0, {
       # Global variables
       N <- isolate(input$PopulationSize) # population size
